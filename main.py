@@ -57,7 +57,7 @@ def run_docker_containers(dir_path):
         # "." is not allowed in the -v of docker and so using absolute path
         log_host_path = dir_path + logs_directory[1:] + nameList[i]
 
-        acc_status += subprocess.call("docker run --privileged -dit --net=none -v %s:/var/log/golang --name %s %s" % (
+        acc_status += subprocess.call("docker run --privileged -dit --bash=none -v %s:/var/log/golang --name %s %s" % (
             log_host_path, nameList[i], base_container_name1), shell=True)
 
     check_return_code(acc_status, "Running docker containers")
@@ -69,12 +69,10 @@ def create_bridge_and_tap_interfaces():
     """
     acc_status = 0
     for x in range(0, numberOfNodes):
-        acc_status += subprocess.call("sudo bash net/singleSetup.sh %s" % (nameList[x]), shell=True)
+        acc_status += subprocess.call("sudo bash scripts/create_bridge_and_tap_interfaces.sh %s" % (nameList[x]),
+                                      shell=True)
 
     check_return_code(acc_status, "Creating bridge and tap interface")
-
-    acc_status += subprocess.call("sudo bash net/singleEndSetup.sh", shell=True)
-    check_return_code(acc_status, "Finalizing bridges and tap interfaces")
 
 
 def create_bridge_for_containers():
@@ -88,7 +86,8 @@ def create_bridge_for_containers():
         with open(pids_directory + nameList[x], "w") as text_file:
             text_file.write("%s" % (pid))
 
-        acc_status += subprocess.call("sudo bash net/container.sh %s %s" % (nameList[x], x), shell=True)
+        acc_status += subprocess.call("sudo bash scripts/create_bridge_for_containers.sh %s %s"
+                                      % (nameList[x], x), shell=True)
 
     # If something went wrong creating the bridges and tap interfaces, we panic and exit
     check_return_code(acc_status, "Creating bridge side-int-X and side-ext-X")
@@ -170,7 +169,7 @@ def destroy():
         r_code = subprocess.call("docker rm %s" % (nameList[x]), shell=True)
         check_return_code_passive(r_code, "Removing docker container %s" % (nameList[x]))
 
-        r_code = subprocess.call("sudo bash net/singleDestroy.sh %s" % (nameList[x]), shell=True)
+        r_code = subprocess.call("sudo bash scripts/destroy.sh %s" % (nameList[x]), shell=True)
         check_return_code_passive(r_code, "Destroying bridge and tap interface %s" % (nameList[x]))
 
         if os.path.exists(pids_directory + nameList[x]):

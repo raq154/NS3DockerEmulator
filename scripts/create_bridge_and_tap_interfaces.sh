@@ -28,10 +28,11 @@ ifconfig tap-$NAME 0.0.0.0 promisc up
 brctl addif br-$NAME tap-$NAME
 ifconfig br-$NAME up
 
-# pushd /proc/sys/net/bridge
-# for f in bridge-nf-*; do echo 0 > $f; done
-# popd
+pushd /proc/sys/net/bridge
+for f in bridge-nf-*; do echo 0 > $f; done
+popd
 
 # References
 # brctl -> http://linuxcommand.org/man_pages/brctl8.html
 # tunctl -> http://linux.die.net/man/8/tunctl
+
