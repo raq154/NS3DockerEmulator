@@ -57,7 +57,7 @@ def run_docker_containers(dir_path):
         # "." is not allowed in the -v of docker and so using absolute path
         log_host_path = dir_path + logs_directory[1:] + nameList[i]
 
-        acc_status += subprocess.call("docker run --privileged -dit --bash=none -v %s:/var/log/golang --name %s %s" % (
+        acc_status += subprocess.call("docker run --privileged -dit --net=none -v %s:/var/log/golang --name %s %s" % (
             log_host_path, nameList[i], base_container_name1), shell=True)
 
     check_return_code(acc_status, "Running docker containers")
