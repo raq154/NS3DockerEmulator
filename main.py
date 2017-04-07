@@ -95,7 +95,7 @@ def create_bridge_for_containers():
 
 
 def run_code_in_ns3():
-    r_code = subprocess.call("cd ns3 && cp tap-wifi-virtual-machine.cc %s" % ns3_path+"scratch/tap-vm.cc", shell=True)
+    r_code = subprocess.call("cd ns3 && cp tap-wifi-virtual-machine.cc %s" % ns3_path+"/scratch/tap-vm.cc", shell=True)
     if r_code != 0:
         print "Error copying latest ns3 file"
     else:
@@ -191,7 +191,7 @@ def destroy():
 # options that require an argument followed by a colon (':') i.e. -i fileName
 #
 try:
-    myopts, args = getopt.getopt(sys.argv[1:], "hn:o:t:", ["number=", "operation=", "time=", "no-cache"])
+    myopts, args = getopt.getopt(sys.argv[1:], "hn:o:t:p:", ["number=", "operation=", "time=", "no-cache","path"])
 except getopt.GetoptError as e:
     print (str(e))
     print("Usage: %s -o <create|destroy> -n numberOfNodes -t emulationTime" % sys.argv[0])
