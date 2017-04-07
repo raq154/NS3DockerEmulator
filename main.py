@@ -50,15 +50,15 @@ def run_docker_containers(dir_path):
     :param dir_path:
     """
     acc_status = 0
-    for node in range(0, numberOfNodes):
-        if not os.path.exists(logs_directory + nameList[node]):
-            os.makedirs(logs_directory + nameList[node])
+    for i in range(0, numberOfNodes):
+        if not os.path.exists(logs_directory + nameList[i]):
+            os.makedirs(logs_directory + nameList[i])
 
-        logHostPath = dir_path + logs_directory[1:] + nameList[
-        node]  # "." are not allowed in the -v of docker and it just work with absolute paths
+        # "." is not allowed in the -v of docker and so using absolute path
+        log_host_path = dir_path + logs_directory[1:] + nameList[i]
 
         acc_status += subprocess.call("docker run --privileged -dit --net=none -v %s:/var/log/golang --name %s %s" % (
-            logHostPath, nameList[node], base_container_name1), shell=True)
+            log_host_path, nameList[i], base_container_name1), shell=True)
 
     check_return_code(acc_status, "Running docker containers")
 
@@ -95,7 +95,8 @@ def create_bridge_for_containers():
 
 
 def run_code_in_ns3():
-    r_code = subprocess.call("cd ns3 && cp tap-wifi-virtual-machine.cc %s" % ns3_path+"/scratch/tap-vm.cc", shell=True)
+    r_code = subprocess.call("cd ns3 && cp tap-wifi-virtual-machine.cc %s" % ns3_path + "/scratch/tap-vm.cc",
+                             shell=True)
     if r_code != 0:
         print "Error copying latest ns3 file"
     else:
@@ -103,8 +104,9 @@ def run_code_in_ns3():
         print "Go to NS3 folder, probably cd $NS3_HOME"
         print "Run sudo ./waf --run \"scratch/tap-vm --NumNodes=%s --TotalTime=%s --TapBaseName=emu\"" % (
             number_of_nodes, evaluation_time)
-        print "or run sudo ./waf --run \"scratch/tap-vm --NumNodes=%s --TotalTime=%s --TapBaseName=emu --SizeX=100 --SizeY=100\"" % (
-            number_of_nodes, evaluation_time)
+        print "or run sudo ./waf --run " \
+              "\"scratch/tap-vm --NumNodes=%s --TotalTime=%s --TapBaseName=emu --SizeX=100 --SizeY=100\"" % (
+                  number_of_nodes, evaluation_time)
 
     print "Done."
 
@@ -112,18 +114,18 @@ def run_code_in_ns3():
 def create():
     print "Creating ..."
 
-    validate_ubuntu_version()
-
     if not os.path.exists(logs_directory):
         os.makedirs(logs_directory)
+
+    if not os.path.exists(pids_directory):
+        os.makedirs(pids_directory)
+
+    build_docker_image()
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     run_docker_containers(dir_path)
 
     create_bridge_and_tap_interfaces()
-
-    if not os.path.exists(pids_directory):
-        os.makedirs(pids_directory)
 
     create_bridge_for_containers()
 
@@ -146,7 +148,7 @@ def ns3():
     return
 
 
-def validate_ubuntu_version():
+def build_docker_image():
     """makes sure that we are running the latest version of our Ubuntu container, as we need some tools available in
     latest version only.
     """
@@ -191,7 +193,7 @@ def destroy():
 # options that require an argument followed by a colon (':') i.e. -i fileName
 #
 try:
-    myopts, args = getopt.getopt(sys.argv[1:], "hn:o:t:p:", ["number=", "operation=", "time=", "no-cache","path"])
+    myopts, args = getopt.getopt(sys.argv[1:], "hn:o:t:p:", ["number=", "operation=", "time=", "no-cache", "path"])
 except getopt.GetoptError as e:
     print (str(e))
     print("Usage: %s -o <create|destroy> -n numberOfNodes -t emulationTime" % sys.argv[0])
